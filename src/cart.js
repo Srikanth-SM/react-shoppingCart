@@ -23,10 +23,10 @@ class Cart extends React.Component {
                 <table className="table table-striped table-inverse table-responsive">
                     <thead className="thead-inverse">
                         <tr>
-                            {/* <th>Items</th> */}
-                            {/* <th>Price</th> */}
-                            {/* <th>Quantity</th> */}
-                            {/* <th>Total Price</th> */}
+                            <th>Items</th>
+                            <th>Price</th>
+                            <th>Quantity</th>
+                            <th>Total Price</th>
                         </tr>
                     </thead>
                     <tbody>
