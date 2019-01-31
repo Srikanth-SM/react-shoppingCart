@@ -1,5 +1,6 @@
 import React from 'react';
 import Product from './product';
+import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
 
 const alignItems = {
     "display": "flex", "flexWrap": "wrap"
@@ -24,7 +25,10 @@ class Products extends React.Component {
         const products = this.props.products;
         const productList = products.map((product) => {
             return (
-                <Product product={product} key={product.id} addToCart={this.addToCart} addToItemsPurchased={this.addToItemsPurchased}></Product >
+                <div>
+                    <Product product={product} key={product.id} addToCart={this.addToCart} addToItemsPurchased={this.addToItemsPurchased}></Product >
+
+                </div>
             )
         });
         return (

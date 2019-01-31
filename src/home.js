@@ -1,86 +1,125 @@
 import React from 'react';
-import { BrowserRouter as Router, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
 import Product from './product';
 import { getProducts } from './constants';
 import Cart from './cart';
+import Order from './orders';
 import Products from './products';
 
 const align = {
     "margin": "10px"
 }
 let renderAllProducts = true;
+const alignItems = {
+    "display": "flex", "flexWrap": "wrap"
+}
 
 class Home extends React.Component {
     constructor(props) {
         super(props);
         console.log("Home is Rendered");
-        // window.sessionStorage.clear();
+        window.sessionStorage.clear();
         let state = window.sessionStorage.state && { ...JSON.parse(window.sessionStorage.state) };
         console.log(state);
         let products = state && state.products ? state.products : getProducts();
-        let itemsInCart = state && state.itemsInCart || [];
-        let itemsPurchased = state && state.itemsPurchased || [];
+        let itemsInCart = state && state.itemsInCart || {};
+        let itemsPurchased = state && state.itemsPurchased || {};
         let renderAllProducts = state && state.renderAllProducts || true;
         console.log(products, itemsInCart);
         this.state = {
             products: products,
             itemsInCart: itemsInCart,
             itemsPurchased: itemsPurchased,
-            renderAllProducts: renderAllProducts
+            renderAllProducts: renderAllProducts,
+            totalCartItems: 0,
+            totalpurchaseItems: 0
         }
     }
 
-    addToCart = (product) => {
-        console.log("Inside add to cart");
-        const t = this.state;
-        this.setState((prevState) => {
-            prevState.itemsInCart.push(product);
-            return { itemsInCart: prevState.itemsInCart }
-        }, () => { window.sessionStorage.state = JSON.stringify(this.state) });
+    addToCart = (product, quantity) => {
+        if (quantity > 0) {
+            console.log("Inside add to cart", product);
+            const t = this.state;
+            const id = product && product.id
+            let cartTotal = this.state.cartTotal;
+            this.setState((prevState) => {
+                if (product[id] in prevState.itemsInCart) {
+                    let itemInCart = prevState.itemsInCart[id];
+                    itemInCart.quantity += quantity;
+                    itemInCart.totalPrice = itemInCart.price * itemInCart.quantity;
+                    prevState.itemsInCart[id] = itemInCart;
 
+                }
+                else {
+                    prevState.itemsInCart[id] = { id: product.id, quantity: quantity, totalPrice: product.price * quantity, price: product.price };
+                    cartTotal = prevState.itemsInCart[id].totalPrice;
+                }
+
+                return { itemsInCart: prevState.itemsInCart }
+            }, () => {
+                return this.setState({ totalCartItems: Object.keys(this.state.itemsInCart).length })
+            })
+
+
+        }
     }
 
     removeFromCart = (id) => {
         console.log("remove from cart");
         const itemsInCart = this.state.itemsInCart;
-        //finding the first matching item with id
-        const index = itemsInCart && itemsInCart.findIndex((item) => {
-            return item.id === id;
-        });
-        // removing the item at index and resizing the array, everything inplace.
-        itemsInCart.splice(index, 1);
-        this.setState(() => {
-            return { itemsInCart: itemsInCart };
-        }, () => { window.sessionStorage.state = JSON.stringify(this.state) });
+        delete itemsInCart[parseInt(id)];
+        this.setState({ itemsInCart: itemsInCart });
+
     }
 
-    addToItemsPurchased = (product) => {
-        console.log("Inside addToItemsPurchased of Home");
-        this.setState((prevState) => {
-            prevState.itemsPurchased.push(product);
-            return { itemsPurchased: prevState.itemsPurchased }
-        }, () => { window.sessionStorage.state = JSON.stringify(this.state) });
+    addToItemsPurchased = (product, quantity) => {
+        if (quantity > 0) {
+            console.log("Inside addToItemsPurchased of Home");
+            const id = product && product.id
+            this.setState((prevState) => {
+                if (product[id] in prevState.itemsPurchased) {
+                    let itemPurchased = prevState.itemsPurchased[id];
+                    itemPurchased.quantity += quantity;
+                    itemPurchased.totalPrice = itemPurchased.price * itemPurchased.quantity;
+                    prevState.itemsPurchased[id] = itemPurchased;
+                }
+                else {
+                    prevState.itemsPurchased[id] = { id: product.id, quantity: quantity, totalPrice: product.price * quantity, price: product.price }
+                }
+
+
+                return { itemsPurchased: prevState.itemsPurchased };
+
+            }, () => {
+                return this.setState({ totalpurchaseItems: Object.keys(this.state.itemsPurchased).length })
+            }, () => { this.setState({ itemInCart: {} }) });
+
+        }
 
     }
 
     renderAllProducts = () => {
         console.log("renderAllProducts");
-        this.setState(() => { return { renderAllProducts: false } }, () => { window.sessionStorage.state = JSON.stringify(this.state) });
+        this.setState(() => { return { renderAllProducts: false } });
     }
 
     itemsInPurchased = () => {
         console.log("Inside itemsInPurchased");
         if (this.state.renderAllProducts) {
-            this.setState(() => { return { renderAllProducts: false } }, () => { window.sessionStorage.state = JSON.stringify(this.state) });
+            this.setState(() => { return { renderAllProducts: false } });
         }
         renderAllProducts = false;
         const itemsPurchased = this.state.itemsPurchased;
 
 
-        const htmlElement = itemsPurchased.map((product) => {
-            const reviews = product.reviews.map((p) => {
+        const htmlElement = Object.keys(itemsPurchased).map((key) => {
+            const product = itemsPurchased[key];
+            console.log(product);
+            const reviews = product.reviews && product.reviews.map((p) => {
                 return <div>{p}</div>
             });
+            console.log(reviews);
+
             return (
                 < div className="card" key={product.id} style={align} > {product.name}
                     < img className="card-img-top" src="..." alt="Card image cap" ></img >
@@ -107,101 +146,80 @@ class Home extends React.Component {
         console.log(event, id);
         let product = products[index];
         product.reviews = product.reviews ? product.reviews : [];
-        product.reviews.push(event.target.getElementsByTagName("textarea")[0].value);
+        product.reviews.push(event);
 
         products.splice(index, 1);
+        products.push(product)
         this.setState((prevState) => {
-            return { product: prevState.products.push(product) }
-        }, () => { window.sessionStorage.state = JSON.stringify(this.state) });
-    }
 
+            return { products: products }
+        }, () => { console.log(this.state) });
+    }
     render() {
-        const itemsInCartLength = this.state.itemsInCart.length;
-        const displayCart = itemsInCartLength <= 0 ? { display: "None" } : { display: "ppp" };
+        // const itemsInCartLength = this.state.itemsInCart.length;
+        // const displayCart = itemsInCartLength <= 0 ? { display: "None" } : { display: "ppp" };
         renderAllProducts = true;
 
         return (
-            <Router>
-                <div>
-                    <div className="container-fluid" >
-                        <div className="row">
-                            <div className="col-8">
-                                <NavBar />
-                                {this.state.renderAllProducts && <Products products={this.state.products} addToCart={this.addToCart} addToItemsPurchased={this.addToItemsPurchased} />}
-                            </div>
-                            <div className="col-4">
-                                <div className="col-2">
-                                    <nav className="navbar navbar-default navbar-fixed-top">
-                                        <div className="navbar-header">
-                                            <button type="button" className="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
-                                                <span className="sr-only">Toggle navigation</span>
-                                                <span className="icon-bar"></span>
-                                                <span className="icon-bar"></span>
-                                                <span className="icon-bar"></span>
-                                                <a className="navbar-brand" href="#">Mycart</a>
-                                            </button>
-                                            <div className="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-                                                <ul className="nav navbar-nav">
-                                                    <li className="active"><a href="#">Checkout <span className="sr-only">(current)</span></a></li>
-                                                </ul>
-                                                <ul className="nav navbar-nav navbar-right"  >
-                                                    <li className="dropdown">
-                                                        {
-                                                            this.state.itemsInCart.length > 0 &&
-                                                            <div>
-                                                                <a href="#" className="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"> <span className="glyphicon glyphicon-shopping-cart"></span> 7 - Items<span className="caret"></span></a>
-                                                                <ul className="dropdown-menu dropdown-cart" role="menu">
-                                                                    {this.state.itemsInCart && <Cart itemsInCart={this.state.itemsInCart} removeFromCart={this.removeFromCart} />}
-                                                                </ul>
-                                                            </div>
-                                                        }
-                                                    </li>
-                                                </ul>
+            <div>
+                <div className="container-fluid" >
+                    <div className="row">
+                        <div className="col-8">
+                            <div >
+                                <ul className="navbar-left">
+                                    <Link to="/">Home</Link>
+                                    <Route path="/" exact render={(props) => {
+                                        const products = this.state.products;
+                                        const productList = products.map((product) => {
+                                            return <Product key={product.id} data={this.state} product={product} addToCart={this.addToCart} addToItemsPurchased={this.addToItemsPurchased} />
+                                        })
+                                        return (
+                                            <div style={alignItems}>
+                                                {productList}
                                             </div>
-                                        </div>
-                                    </nav>
-                                </div>
-                                <div className="col-2">
-                                    <div className="dropdown">
-                                        <button type="button" className="btn btn-primary dropdown-toggle" data-toggle="dropdown">
-                                            My orders
-                                    </button>
-                                        <div className="dropdown-menu">
-                                            {/* <h5 class="dropdown-header">Dropdown header</h5> */}
-                                            <a className="dropdown-item" href="/myorders/">List my Orders</a>
+                                        )
+                                    }} />
+                                    <Route path="/Cart/" render={(props) => {
+                                        return (Object.keys(this.state.itemsInCart).length > 0 ?
+                                            <Cart data={this.state} addToCart={this.addToCart} addToItemsPurchased={this.addToItemsPurchased} addReview={this.addReview} disableLink={true} removeFromCart={this.removeFromCart}{...props} />
+                                            : <div style={align}><h1>There are no items cart</h1></div>)
+                                    }} />
+                                    <Route path="/orders/" render={(props) => {
+                                        return (Object.keys(this.state.itemsPurchased).length > 0 ?
+                                            <Order data={this.state} addToCart={this.addToCart} addToItemsPurchased={this.addToItemsPurchased} addReview={this.addReview} disableLink={true} removeFromCart={this.removeFromCart} itemsPurchased={this.itemsInPurchased}{...props} />
+                                            : <div style={align}><h1>There are no items buyed</h1></div>)
+                                    }} />
+                                </ul>
+                            </div>
+                        </div>
+                        <div className="col-4">
+                            <div className="row">
+                                <div className="col-6">
+                                    <Link to="Cart" >Cart {this.state.totalCartItems > 0 && this.state.totalCartItems} </Link>
 
-                                        </div>
-                                    </div>
+                                </div>
+                                <div className="col-6">
+                                    <Link to="Orders" style={align}>Orders {this.state.totalpurchaseItems > 0 && this.state.totalpurchaseItems}</Link>
                                 </div>
                             </div>
-                        </div >
-                    </ div >
+
+                        </div>
 
 
-                    {/* <Route path="/" exact render={(props) => { return <Home {...props} /> }} /> */}
-                    <Route path="/products/:id" render={(props) => {
-                        return <Product product={this.state.products} addToCart={this.addToCart} addToItemsPurchased={this.addToItemsPurchased} doesrenderAllProducts={this.state.renderAllProducts} renderAllProducts={this.renderAllProducts} disableLink={false} addReview={this.addReview} {...props} />
-                    }} />
-                    <Route path="/myorders/" render={(props) => { return this.itemsInPurchased(); }} />
+                        <Route path="/products/:id" render={(props) => {
+                            return <Product product={this.state.products} data={this.state} addToCart={this.addToCart} addToItemsPurchased={this.addToItemsPurchased} addReview={this.addReview} disableLink={true} {...props} />
+                        }} />
+                        <Route path="/myorders/" render={(props) => { return this.itemsInPurchased(); }} />
+                    </div>
                 </div>
+            </div >
 
-            </Router >
+
 
         )
     }
 }
-function NavBar(props) {
-    return (
-        <nav className="navbar navbar-default navbar-fixed-top">
-            <div >
-                <ul className="navbar-left">
-                    <a style={align} href="/products/">Home</a>
-                    <a style={align} href="#about">About</a>
-                </ul>
-            </div>
-        </nav>
-    );
-}
+
 
 
 
