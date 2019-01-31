@@ -68,7 +68,12 @@ class Home extends React.Component {
         console.log("remove from cart");
         const itemsInCart = this.state.itemsInCart;
         delete itemsInCart[parseInt(id)];
-        this.setState({ itemsInCart: itemsInCart });
+        // this.setState({ itemsInCart: itemsInCart });
+        this.setState((prevState) => {
+            const totalCartItems = prevState.totalCartItems;
+            const items = totalCartItems > 0 ? totalCartItems - 1 : 0;
+            return { itemsInCart: itemsInCart, totalCartItems: items };
+        }, () => { console.log(this.state) })
 
     }
 
