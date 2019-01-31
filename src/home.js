@@ -150,6 +150,7 @@ class Home extends React.Component {
 
         products.splice(index, 1);
         products.push(product)
+
         products.sort((a, b) => parseInt(a.id) - parseInt(b.id));
         this.setState((prevState) => {
 
