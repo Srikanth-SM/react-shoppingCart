@@ -21,36 +21,33 @@ class Order extends React.Component {
       let item = itemsPurchased[key];
       total += item.totalPrice;
       return (
-        <div>
-          <table className="table table-striped table-inverse table-responsive">
-            <thead className="thead-inverse">
-              <tr>
-                <th>Items</th>
-                <th>Price</th>
-                <th>Quantity</th>
-                <th>Total Price</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td scope="row">{item.id}</td>
-                <td>{item.price}</td>
-                <td>{item.quantity}</td>
-                <td>{item.totalPrice}</td>
-                <td>
-                  {/* <button NameName="btn btn-xs btn-danger pull-right" onClick={() => this.props.removeFromCart(item.id)}>X</button> */}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          {/* {htmlElement} */}
-        </div>
+        <tr>
+          <th style={{ textAlign: "center" }}>{item.id}</th>
+          <th style={{ textAlign: "center" }}>{item.price}</th>
+          <th style={{ textAlign: "center" }}>{item.quantity}</th>
+          <th style={{ textAlign: "center" }}>{item.totalPrice}</th>
+          <td>
+            {/* <button NameName="btn btn-xs btn-danger pull-right" onClick={() => this.props.removeFromCart(item.id)}>X</button> */}
+          </td>
+        </tr>
       );
     });
+    itemsPurchasedList.unshift(
+      <tr>
+        <th>Items</th>
+        <th>Price</th>
+        <th>Quantity</th>
+        <th>Total Price</th>
+      </tr>
+    );
     console.log(itemsPurchasedList);
     return (
       <div>
-        total ={total} $<div>{itemsPurchasedList}</div>
+        <table class="table">
+          <thead>
+            total ={total} $<div>{itemsPurchasedList}</div>
+          </thead>
+        </table>
       </div>
     );
   }

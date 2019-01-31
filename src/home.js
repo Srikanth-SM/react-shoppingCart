@@ -211,7 +211,14 @@ class Home extends React.Component {
                           />
                         );
                       });
-                      return <div style={alignItems}>{productList}</div>;
+                      return (
+                        <div>
+                          <div>
+                            <h3>Products</h3>
+                          </div>
+                          <div style={alignItems}>{productList}</div>
+                        </div>
+                      );
                     }}
                   />
                   <Route
