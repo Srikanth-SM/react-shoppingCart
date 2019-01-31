@@ -1,25 +1,20 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
+import React from "react";
+import ReactDOM from "react-dom";
+import { BrowserRouter as Router } from "react-router-dom";
 
-import './index.css';
-import App from './App';
-import Home from './home';
-import Product from './products';
-import * as serviceWorker from './serviceWorker';
-const align = {
-    "margin": "10px"
-}
+import "./index.css";
+import Home from "./home";
+import * as serviceWorker from "./serviceWorker";
 
 ReactDOM.render(
-    <Router>
-        <div>
-            <Home />
-        </div>
-    </Router>,
+  <Router>
+    <div>
+      <Home />
+    </div>
+  </Router>,
 
-
-    document.getElementById('root'));
+  document.getElementById("root")
+);
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.
