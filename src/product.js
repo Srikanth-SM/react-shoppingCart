@@ -104,7 +104,8 @@ class Product extends React.Component {
                 <button
                   className="btn btn-light"
                   value="-1"
-                  onClick={event => this.changeQuantity(event)}>
+                  onClick={event => this.changeQuantity(event)}
+                >
                   -1
                 </button>
                 <span style={margin} id="quantity">
@@ -113,7 +114,8 @@ class Product extends React.Component {
                 <button
                   className="btn btn-light"
                   value="1"
-                  onClick={event => this.changeQuantity(event)}>
+                  onClick={event => this.changeQuantity(event)}
+                >
                   1
                 </button>
               </span>
@@ -121,7 +123,8 @@ class Product extends React.Component {
                 <div>
                   <button
                     style={margin}
-                    onClick={() => addToCart(product, this.state.quantity)}>
+                    onClick={() => addToCart(product, this.state.quantity)}
+                  >
                     {" "}
                     add to cart
                   </button>
@@ -136,7 +139,8 @@ class Product extends React.Component {
                         product,
                         this.state.quantity
                       )
-                    }>
+                    }
+                  >
                     {" "}
                     Buy{" "}
                   </button>
@@ -149,7 +153,8 @@ class Product extends React.Component {
             <form
               onSubmit={event => {
                 this.handleSubmit(event, product.id);
-              }}>
+              }}
+            >
               {/* <div>Add Review <br /> */}
               {/* <textarea id="review" id="" cols="30" rows="10" > </textarea> */}
               {/* </div> */}
@@ -171,7 +176,8 @@ const ButtonComponent = props => {
     <button
       className="btn btn-light"
       value={props.value}
-      onClick={props.changeQuantity(props.value)}>
+      onClick={props.changeQuantity(props.value)}
+    >
       {props.value}
     </button>
   );
